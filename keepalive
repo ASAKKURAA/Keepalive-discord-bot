@@ -1,16 +1,27 @@
-from flask import Flask 
-from threading import Thread
+from config import settings
+import discord
+import os
+from discord.ext import commands
 
-app = Flask('')
+#Создаем экземпдяр клиента
+client = discord.Client()
+#Префикс бота
+bot = commands.Bot(command_prefix = settings['prefix'])
 
-@app.route('/')
-def home():
-    return "I'm alive"
+#Будет показывать, когда наш робот будет в сети
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
 
-def run():
-    app.run(host = 'o.o.o.o', port = 8080)
+#Если Сообщения автора такое же, как и наше возвращаем функцию к началу
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
 
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
+#Обычный ответчик на сообщение
+    if message.content.startswith('Атака'):
+        await message.channel.send('Вы атаковали!')
 
+#Тут мы регистрируем бота при помощи токена
+client.run(settings['token'])
