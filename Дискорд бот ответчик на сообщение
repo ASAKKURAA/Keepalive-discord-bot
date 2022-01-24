@@ -1,27 +1,47 @@
+
+import discord 
 from config import settings
-import discord
-import os
 from discord.ext import commands
+from random import randint
 
-#Создаем экземпдяр клиента
+bot = commands.Bot(command_prefix= settings["prefix"])
 client = discord.Client()
-#Префикс бота
-bot = commands.Bot(command_prefix = settings['prefix'])
 
-#Будет показывать, когда наш робот будет в сети
-@client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+damage = randint(0, 10)
+shield = randint(0, 10)
 
-#Если Сообщения автора такое же, как и наше возвращаем функцию к началу
-@client.event
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author ==  bot.user:
         return
 
-#Обычный ответчик на сообщение
-    if message.content.startswith('Атака'):
-        await message.channel.send('Вы атаковали!')
+@bot.event
+async def on_ready():
+    print("Я работаю, все хорошо!")
 
-#Тут мы регистрируем бота при помощи токена
-client.run(settings['token'])
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+    if message.content.startswith("Атака"):
+        await message.channel.send("Вы атаковали!")
+
+    if message.content.startswith("Защита"):
+        await message.channel.send("Вы защитились!")
+
+
+@bot.command()
+async def send(ctx, member: discord.Member = None):
+
+    if member == None:
+        return
+    await ctx.channel.send(f"{ctx.author.mention} отправил бебру пользователю {member.mention}")
+        
+
+@bot.command()
+async def menu (ctx):
+    emb = discord.Embed(title = "Как играть в нашу сырую и никому не нужную игру...", color = discord.Color.blue())
+    emb.add_field(name = "ПРАВИЛА:", value = "Как пользоваться ботом: \n Короче, \n 1) Читы - бан \n 2)Кемперство - бан \n 3)Оскорбление - бан \n Оскорбление администрации - расстрел, потом бан \n Всем приятной игры!", inline = True)
+    await ctx.send(embed = emb)
+
+bot.run(settings["token"])
+
